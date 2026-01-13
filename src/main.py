@@ -59,31 +59,27 @@ def main():
     # Initial Spawn
     cars = reset_simulation()
 
+    # ... inside main() ...
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                cars = reset_simulation()
 
-            # Manual Reset
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    cars = reset_simulation()
-
-        # 1. Move Cars
+        # 1. Move & Sensor Update
         for car in cars:
             car.move()
+            car.check_radar(cars) # <--- NEW: Pass the list of cars so they can see each other
 
-        # 2. Check Collisions
+        # 2. Check Collisions (Game Over)
         if check_collisions(cars):
-            print("CRASH! Resetting simulation...") # Console log for debugging
+            print("CRASH! Resetting...")
             cars = reset_simulation()
 
-        # 3. Clean up cars that leave the screen (Optional memory management)
-        # Keeps list small so collision check stays fast
+        # 3. Clean & Respawn
         cars = [c for c in cars if -50 < c.x < WIDTH + 50 and -50 < c.y < HEIGHT + 50]
-
-        # If screen is empty, respawn (so you don't stare at empty road)
         if len(cars) == 0:
             cars = reset_simulation()
 
